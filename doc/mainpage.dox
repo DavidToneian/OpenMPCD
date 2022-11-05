@@ -15,6 +15,8 @@
  * on GPUs via `CUDA`, and also comes with a Python toolkit to analyze the data
  * produced by the simulations.
  *
+ * The package is hosted on GitHub at https://github.com/DavidToneian/OpenMPCD
+ *
  *
  * @section ListOfFeatures List of features
  * The following is an incomplete list of features and techniques implemented
