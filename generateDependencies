@@ -1,0 +1,4 @@
+#!/bin/bash
+# Generate a list of all dependencies with nvcc 
+# and grep only the non-system-headers
+nvcc -M -MT $1 $2 $3 | egrep "^[[:blank:]]*include/.*$|^[[:blank:]]*cudaDeviceCode/.*$|^[[:blank:]]*test/.*$|^.*\.o.*$" 

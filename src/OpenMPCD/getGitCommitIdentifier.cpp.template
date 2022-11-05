@@ -1,0 +1,7 @@
+#include <OpenMPCD/getGitCommitIdentifier.hpp>
+
+const std::string OpenMPCD::getGitCommitIdentifier()
+{
+	return "OPENMPCD_VERSION";
+}
+

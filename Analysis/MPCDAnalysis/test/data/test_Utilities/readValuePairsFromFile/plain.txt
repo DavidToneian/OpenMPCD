@@ -1,0 +1,10 @@
+foo
+foo bar
+foo bar baz
+0 1
+0 1 2
+-1.5 3.1415
+bar foo
+baz
+9e2 0.1
+

@@ -1,0 +1,17 @@
+Analysis/computeTransverseVelocityCorrelationFunction
+Analysis/*.pyc
+Analysis/MPCDAnalysis/**/*.pyc
+Analysis/MPCDAnalysis/__pycache__
+build
+Debug
+doxygen-output
+.cproject
+gmon.out
+goodRuns
+linkedRuns
+openmpcd
+Release
+runs
+src/OpenMPCD/getGitCommitIdentifier.cpp
+test/runtests
+untracked

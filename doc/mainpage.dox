@@ -1,0 +1,236 @@
+/**
+ * @mainpage OpenMPCD -- Simulation and Data Analysis Package for Multi-Particle Collision Dynamics
+ *
+ * @section Introduction
+ * `OpenMPCD` is a software package that implements Multi-Particle Collision
+ * Dynamics
+ * @cite Malevanets1999
+ * @cite Malevanets2000
+ * @cite Gompper2008
+ * -- in particular, the Stochastic Rotation Dynamics
+ * @cite Ihle2001
+ * @cite Ihle2003
+ * @cite Ihle2003a
+ * variant that does not conserve angular momentum --
+ * on GPUs via `CUDA`, and also comes with a Python toolkit to analyze the data
+ * produced by the simulations.
+ *
+ *
+ * @section ListOfFeatures List of features
+ * The following is an incomplete list of features and techniques implemented
+ * in the package at the moment:
+ *  - Molecular Dynamics (MD) code that couples to MPC
+ *  - Grid Shift @cite Ihle2003 in order to guarantee Galilean invariance
+ *  - Maxwell-Boltzmann-Scaling Thermostat
+ *    @cite Huang2010
+ *  - Viscoelastic MPC fluids, modeled as ideal linear polymers with harmonic
+ *    spring potentials
+ *    @cite Rouse1953
+ *    @cite Tao2008
+ *    @cite Kowalik2013
+ *    @cite Toneian2015
+ *  - Various solutes (such as star polymers) and pre-defined pair potentials
+ *    for particle interactions during the streaming step
+ *  - Lees-Edwards boundary conditions
+ *    @cite Lees1972
+ *    @cite Allen1987,
+ *    or, as a special case, ordinary periodic boundary conditions.
+ *
+ *
+ * @section Building Building the executable
+ * Currently, most parts of the `OpenMPCD` simulation package require a
+ * CUDA-capable graphics card to be present for calculations, and consequently
+ * requires that a CUDA-capable compiler (such as `nvcc`) is present.
+ *
+ * To build `OpenMPCD`, change into its root directory, where there is a
+ * `Makefile`. Typing `make` should produce, relative to the root directory,
+ * the `openmpcd` executable, which can be used to run simualations, and
+ * `test/runtests` that executes the unit and integration tests that come with
+ * the simulation software. (To test the analysis suite, run
+ * `python -m pytest Analysis/MPCDAnalysis/test`.)
+ *
+ *
+ * @section ConfigurationFile The main configuration file
+ * Most of the behavior of `OpenMPCD` is configured with the file `config.txt`,
+ * which will be looked for in the current working directory when executing
+ * `openmpcd`. This file is in `libconfig` @cite libconfig format.
+ * While it is recommended that one reads that library's documentation in order
+ * to understand the configuration syntax, most of it will probably be
+ * considered natural after the following examples. It is important to know,
+ * however, that `libconfig` strictly distinguishes integers from
+ * floating-point values, and does not by default convert one to the other;
+ * as such, when a configuration option expects a floating-point value, it is
+ * not permissible to specify, say, `1`; rather, one has to write `1.0`.
+ * 
+ * The following would correspond to the simplest configuration permissible:
+ * @code
+ * initialization:
+ * {
+ *   particleDensity = 10
+ *   particleVelocityDistribution:
+ *   {
+ *     mean = 0.0
+ *     standardDeviation = 1.0
+ *   }
+ * }
+ *
+ * mpc:
+ * {
+ *   fluid:
+ *   {
+ *     simple: {}
+ *   }
+ *   simulationBoxSize:
+ *   {
+ *     x = 30
+ *     y = 30
+ *     z = 30
+ *   }
+ *   timestep = 0.1
+ *   srdCollisionAngle = 2.27 //corresponds to ~130°
+ *   warmupSteps = 1000
+ *   sweeps = 10000
+ *   sweepSize = 1
+ *   gridShiftScale = 1.0
+ * }
+ *
+ * bulkThermostat:
+ * {
+ *   type = "MBS"
+ *   targetkT = 1.0
+ * }
+ *
+ * boundaryConditions:
+ * {
+ *   LeesEdwards:
+ *   {
+ *     shearRate = 0.0
+ *   }
+ * }
+ * @endcode
+ *
+ * The order in which the configuration settings are specified is irrelevant,
+ * except that they should not be given multiple times.
+ *
+ * This configuration corresponds to a simulation with `30x30x30` MPC collision
+ * cells (`mpc.simulationBoxSize.x`, `mpc.simulationBoxSize.y`, and
+ * `mpc.simulationBoxSize.z`), each cell containing, on average, `10` particles,
+ * for a total number of `10x30x30x30` particles
+ * (`initialization.particleDensity`).
+ * The particles will be placed randomly in the primary simulation volume, and
+ * their initial velocitiy (Cartesian) components will be drawn from a normal
+ * distribution with `mean` and `standardDeviation` as given in
+ * `initialization.particleVelocityDistribution`.
+ * After the velocities have been drawn, all velocities are shifted such that
+ * the system as a whole has a net velocity of `0` (note however, that this
+ * condition is not necessarily perfectly fulfilled, due to inaccuracies in
+ * floating-point calculations and representation).
+ *
+ * The presence of the `mpc.fluid.simple` setting group signals that one wishes
+ * to simulate with an ordinary MPC fluid, i.e. a collection of point particles
+ * that stream independently of one another.
+ * `mpc.timestep` and `mpc.srdCollisionAngle` configure the streaming timestep
+ * and the SRD collision angle \f$ \alpha \f$.
+ *
+ * `mpc.sweepSize` configures how many streaming-collision-cycles should be
+ * performed for what is called a "sweep". Measurements on the system are
+ * performed once after each sweep, so this configuration option allows one to
+ * avoid carrying out expensive measurements more frequently than desired.
+ *
+ * `mpc.warmupSteps` configures the number of streaming-collision-cycles that
+ * are to be performed before the first sweep (and hence the first measurement)
+ * is performed. This is useful to let the system reach a steady state from its
+ * initial (and quite possibly unphysical) state.
+ *
+ * `mpc.sweeps` specifies the number of sweeps after which to terminate the
+ * simulation and save the resulting measurement data to disk.
+ *
+ * `mpc.gridShiftScale` should in most cases be set to `1.0` to ensure Galilean
+ * invariance, but can be set to `0.0` to turn off the grid shift procedure.
+ *
+ * `bulkThermostat.type` specifies the type of the bulk thermostat; currently,
+ * only `"MBS"`, the Maxwell-Boltzmann-Scaling thermostat, is supported.
+ * `bulkThermostat.targetkT` configures the target temperature (multiplied by
+ * Boltzmann's constant) of the thermostat.
+ *
+ * Finally, `boundaryConditions` defines the type of boundary conditions,
+ * with the only one currently supported being `"LeesEdwards"`. Note,
+ * however, that this is equivalent to ordinary periodic boundariy conditions if
+ * `boundaryConditions.LeesEdwards.shearRate` is set to `0.0`.
+ *
+ * @section RunningOpenMPCD Running the `openmpcd` executable
+ * After the configuration file has been written, `openmpcd` can be run, either
+ * without options, or with the options given when running `openmpcd --help`.
+ * If the `--rundir` option is not given, the "run directory", i.e. the
+ * directory in which output data for this simulation run will be saved, will be
+ * created in the `runs` directory (relative to the current working directory),
+ * which must exist and be writable. Within that directory, a new directory with
+ * the current date and time will be created automatically.
+ *
+ * The simulation ends after `mpc.sweeps` sweeps have been performed, or after
+ * a specified number of seconds have passed (see `--maxRuntime`; note that
+ * the value specified there does not include the time it takes to write data
+ * to the disk).
+ * Alternatively, the simulation terminates, after completing the current sweep
+ * and writing data to disk, in case the program receives the `SIGINT` or
+ * `SIGTERM` signals (which can be generated by pressing `Ctrl+C`). If another
+ * `SIGINT` or `SIGTERM` signal is received, `openmpcd` ends abruptly without
+ * saving data.
+ *
+ * If the `SIGUSR1` signal is received (see e.g. the `kill(1)` manpage),
+ * `openmpcd` will first complete the current sweep, then create a directory
+ * named `EarlySave_<current date and time>` within the run directory, and save
+ * the data accumulated so far in that directory. After that, it will continue
+ * the simulation as if nothing had happened.
+ * This feature may be useful if one wants to have a look at the simulation
+ * state, without aborting the simulation and having to start anew.
+ *
+ *
+ * @section RepresentationOfPositionCoordinates Representation of particle positions
+ * Particle positions are represented as a set of three Cartesian floating-point
+ * coordinates. Although during initialization, they are set to values within
+ * what is called the "primary simulation volume", i.e. in the range from `0` to
+ * `mpc.simulationBoxSize.x` for the `x` coordinate, and analogously for the `y`
+ * and `z` coordinates, the particle positions are in no way restricted to these
+ * ranges.
+ * This simplifies some aspects (e.g. displacement measurements,
+ * particle-particle-distances within one solute object (unless it is of
+ * comparable size as the whole system)), but complicates others (such as
+ * determining the minimal distance between a pair of particles that does not
+ * belong to the same solute, i.e. where one has to take mirror images into
+ * account).
+ *
+ * @section Organization Organization of the `OpenMPCD` package.
+ * `OpenMPCD` is organized in two parts: first, the C++/CUDA part that carries
+ * out simulations, and second, the Python part that can be used for data
+ * analysis (which also contains some C++ code in case improved performance was
+ * required).
+ *
+ * The C++/CUDA files can be found in the `include`, `src`, and `cudaDeviceCode`
+ * directories, with unit and integration tests residing in the `test`
+ * directory.
+ *
+ * The Python part can be found in the `Analysis` directory. The files in that
+ * directory are meant to be executed to perform analysis tasks, while the files
+ * and directories in the `Analyis/MPCDAnalysis` directory contain the
+ * underlying library of Python classes and functions.
+ *
+ * The `OpenMPCD` C++/CUDA simulation code lies in the `OpenMPCD` namespace.
+ * Most of the actual simulation code currently relies on CUDA being present,
+ * and is thus declared and defined in the `OpenMPCD::CUDA` namespace; future
+ * versions of `OpenMPCD` might include support for CPU-only calculations.
+ *
+ * The most important namespaces for users, or those who want to add
+ * functionality, are probably the `OpenMPCD::CUDA::MPCFluid` and
+ * `OpenMPCD::CUDA::MPCSolute` namespaces, and the `Instrumentation` namespaces
+ * therein.
+ * `OpenMPCD` currently distinguishes, for better or worse, between "MPC fluids",
+ * i.e. those parts of the systems that make up the majority of the MPC
+ * particles, and "MPC solutes", which typically consist of a number of
+ * particles orders of magnitude lower than the number of MPC fluid particles,
+ * but typically require more detailed simulation during the streaming step, via
+ * coupled Molecular Dynamics.
+ *
+ * For further details on how the program is structured, see the
+ * @link ProgramOverview ProgramOverview page @endlink.
+ */

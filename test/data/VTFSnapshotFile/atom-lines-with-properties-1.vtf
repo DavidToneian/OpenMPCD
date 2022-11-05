@@ -1,0 +1,7 @@
+atom 0 name testname
+atom 1, 2 name testname type testtype
+atom 3:5 type hasradius name rad radius 1.23
+atom 6:9 radius 0 name rad type zeroradius
+atom 10, 11:14 type onlytype
+atom 100
+atom 101:137

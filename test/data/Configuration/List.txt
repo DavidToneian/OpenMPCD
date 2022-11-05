@@ -1,0 +1,23 @@
+emptyArray = []
+emptyList = ()
+strArray = ["hello", "world"]
+strList = ("foo", "bar")
+intArray = [-1, 2, 34]
+mixedList = ("pi", 3.1415)
+
+group:
+{
+	nestedArray = [0.0, 1.5, 3.7, -4.91]
+	nestedList = (false, "xyz")
+}
+
+listOfGroups =
+(
+	{
+		name = "group1";
+	},
+	{
+		name = "group2";
+		isGroup2 = true;
+	}
+);

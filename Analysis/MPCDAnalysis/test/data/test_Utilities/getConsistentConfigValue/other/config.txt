@@ -1,0 +1,4 @@
+same = "hello"
+bar = "foo"
+baz = -1.23
+grp = { asdf = "asdf" }

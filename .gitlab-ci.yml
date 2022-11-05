@@ -1,0 +1,18 @@
+build-and-execute-test:
+ script:
+  - make clean
+  - make
+  - make -C Analysis
+  - mkdir -p test/output/performance-tests
+  - ./test/runtests ~MPI
+  - mpirun -np 1 ./test/runtests [MPI]
+  - mpirun -np 2 ./test/runtests [MPI] --order lex
+  - mpirun -np 3 ./test/runtests [MPI] --order lex
+  - mpirun -np 4 ./test/runtests [MPI] --order lex
+  - python2 -m pytest -W error Analysis/MPCDAnalysis/test
+  - python3 -m pytest -W error Analysis/MPCDAnalysis/test
+  - doxygen
+ artifacts:
+  paths:
+   - "test/output"
+  when: always

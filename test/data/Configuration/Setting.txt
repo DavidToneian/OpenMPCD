@@ -1,0 +1,26 @@
+str = "hello world";
+int = 123;
+float = -4.56;
+group =
+{
+	str = "foobar";
+	int = -789;
+	float = -10.0;
+	group =
+	{
+		str = "level3";
+	};
+};
+
+list = (0, 1, 2, 3);
+
+listOfGroups =
+(
+	{
+		name = "group1";
+	},
+	{
+		name = "group2";
+		isGroup2 = true;
+	}
+);

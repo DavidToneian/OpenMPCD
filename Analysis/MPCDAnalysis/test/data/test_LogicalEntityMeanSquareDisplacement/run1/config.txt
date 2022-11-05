@@ -1,0 +1,42 @@
+instrumentation = {
+  logicalEntityMeanSquareDisplacement = {
+    measureEveryNthSweep = 1;
+    measurementArgumentCount = 1000;
+  };
+};
+initialization = {
+  particleVelocityDistribution = {
+    standardDeviation = 1.0;
+    mean = 0.0;
+  };
+  particleDensity = 10;
+  kT = 1.0;
+};
+bulkThermostat = {
+  targetkT = 1.0;
+  type = "MBS";
+};
+boundaryConditions = {
+  shearRate = 0.0;
+  type = "Lees-Edwards";
+};
+mpc = {
+  gridShiftScale = 1.0;
+  timestep = 0.1;
+  simulationBoxSize = {
+    y = 10;
+    x = 10;
+    z = 10;
+  };
+  sweeps = 50000;
+  fluid = {
+    gaussianChains = {
+      springConstant = 1.0;
+      particlesPerChain = 2;
+      mdStepCount = 5;
+    };
+  };
+  srdCollisionAngle = 2.27;
+  warmupSteps = 5000;
+  sweepSize = 1;
+};

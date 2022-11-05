@@ -1,0 +1,36 @@
+/**
+ * @page ProgramOverview Overview of the main `openmpcd` program.
+ *
+ * The program starts execution in the `main` function in
+ * `src/OpenMPCD/main.cpp`.
+ * There, the command line arguments are parsed
+ * (run `openmpcd` with the `--help` flag for more information),
+ * and the `run` function is called, which controls the rest of the
+ * program execution.
+ *
+ * There, the @link SignalHandler signal handler @endlink is installed.
+ * Then, the run directory is created if it does not exist already; if it does
+ * exist already, it is checked whether it is empty, except for `config.txt`,
+ * which, if present, is taken to be the configuration file (as opposed to the
+ * default `config.txt` relative to the working directory, i.e. the directory
+ * the `openmpcd` executable was launched from), and an `input` directory, which
+ * may contain arbitrary input data for the simulation, e.g. initial particle
+ * configurations.
+ * The path to the run directory can be specified on the command line, and
+ * defaults to `runs/YYYY-MM-DD_hh:mm:ss`, where `YYYY` is the year, `MM` the
+ * month, `DD` the day, `hh` the hour in 24-hour format, `mm` the minute, and
+ * `ss` the second the simulation has started.
+ *
+ * Then, instances of `OpenMPCD::CUDA::Simulation` and
+ * `OpenMPCD::CUDA::Instrumentation` are constructed, reading the configuration
+ * file in the process.
+ *
+ * After that, the simulation performs warmup steps (if configured), and
+ * performs sweep-measure-cycles, until either the configured number of sweeps
+ * have been performed, or the maximum runtime (as given on the command line)
+ * has been reached, whichever comes first.
+ *
+ * Finally, the measured data and simulation metadata are saved to the run
+ * directory.
+ */
+

@@ -1,0 +1,17 @@
+/**
+ * @page SignalHandler Signal Handler
+ *
+ * The `openmpcd` executable installs a custom signal handler, which overrides
+ * the following behaviors:
+ * - If `SIGHUP` is received, the signal is ignored, so that the program does
+ *   not terminate if the launching terminal disconnects;
+ * - If `SIGINT` (e.g. created via `Ctrl+C`) or `SIGTERM` (e.g. by `kill`) is
+ *   received for the first time, a flag will be set that instructs the program
+ *   to terminate after the current sweep-measurement-cycle, saving measured
+ *   data as usual. If another `SIGINT` or `SIGTERM` is received, the program
+ *   aborts immediately, without saving data;
+ * - If `SIGUSR1` is received (e.g. via `kill -USR1`), the simulation will save
+ *   all data to a newly created directory `EarlySave_YYYY-MM-DD_hh:mm:ss`
+ *   within the run directory, with the current date and time substituted,
+ *   after the current sweep, and then proceed the simulation as normal.
+ */

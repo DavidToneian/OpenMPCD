@@ -1,0 +1,8 @@
+		#extrema = C_vT.getLocalExtrema(True)
+		#for x, y in extrema.items():
+		#	if y < 0:
+		#		extrema[x] = -y
+
+		#print(zip(*extrema.items()))
+		#plotX, plotY = zip(*extrema.items())
+		#plt.gca().plot(plotX, plotY)

@@ -1,0 +1,6 @@
+foo = "bar"
+baz = 1.0
+grp = { asdf = 10 }
+irrelevant = -1
+same = "hello"
+unique = "yes"

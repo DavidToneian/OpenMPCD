@@ -1,0 +1,6 @@
+incomplete, but existing test files:
+	CUDA/Instrumentation
+	CUDA/MPCFluid/BaseTest
+	CUDA/SimulationTest
+	ScalarTest
+	Vector3DTest
