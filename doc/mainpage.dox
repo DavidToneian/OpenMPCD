@@ -158,7 +158,7 @@
  * however, that this is equivalent to ordinary periodic boundariy conditions if
  * `boundaryConditions.LeesEdwards.shearRate` is set to `0.0`.
  *
- * @section RunningOpenMPCD Running the `openmpcd` executable
+ * @section RunningOpenMPCD Running the openmpcd executable
  * After the configuration file has been written, `openmpcd` can be run, either
  * without options, or with the options given when running `openmpcd --help`.
  * If the `--rundir` option is not given, the "run directory", i.e. the
@@ -200,7 +200,7 @@
  * belong to the same solute, i.e. where one has to take mirror images into
  * account).
  *
- * @section Organization Organization of the `OpenMPCD` package.
+ * @section Organization Organization of the OpenMPCD package.
  * `OpenMPCD` is organized in two parts: first, the C++/CUDA part that carries
  * out simulations, and second, the Python part that can be used for data
  * analysis (which also contains some C++ code in case improved performance was

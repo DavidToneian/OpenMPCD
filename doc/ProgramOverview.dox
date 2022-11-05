@@ -1,5 +1,5 @@
 /**
- * @page ProgramOverview Overview of the main `openmpcd` program.
+ * @page ProgramOverview Overview of the main openmpcd program.
  *
  * The program starts execution in the `main` function in
  * `src/OpenMPCD/main.cpp`.
